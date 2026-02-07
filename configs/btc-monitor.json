@@ -1,0 +1,23 @@
+{
+  "collection_interval_seconds": 30,
+  "retention_days": 30,
+  "data_dir": "/var/lib/bitcoin-monitor",
+  "socket_path": "/var/run/bitcoin-monitor.sock",
+  "bitcoin": {
+    "enabled": true,
+    "cli_path": "/usr/local/bin/bitcoin-cli",
+    "data_dir": "/var/lib/bitcoin",
+    "user": "bitcoin",
+    "timeout_seconds": 10
+  },
+  "tor": {
+    "enabled": true,
+    "control_port": 9051,
+    "cookie_path": "/var/lib/tor/control_auth_cookie",
+    "timeout_seconds": 10
+  },
+  "system": {
+    "enabled": true,
+    "monitor_disk_path": "/var/lib/bitcoin"
+  }
+}
