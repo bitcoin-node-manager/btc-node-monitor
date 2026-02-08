@@ -99,14 +99,15 @@ func (c *BitcoinCollector) Collect() (*metrics.BitcoinMetrics, error) {
 
 // runCLI executes bitcoin-cli command
 func (c *BitcoinCollector) runCLI(args ...string) ([]byte, error) {
-	// Build command: sudo -n -u bitcoin bitcoin-cli [args]
-	cmdArgs := []string{"-n", "-u", c.user, c.cliPath}
+	// Build command: bitcoin-cli [args]
+	// Agent runs as bitcoin user via systemd, so no sudo needed
+	cmdArgs := []string{}
 	if c.dataDir != "" {
 		cmdArgs = append(cmdArgs, fmt.Sprintf("-datadir=%s", c.dataDir))
 	}
 	cmdArgs = append(cmdArgs, args...)
 
-	cmd := exec.Command("sudo", cmdArgs...)
+	cmd := exec.Command(c.cliPath, cmdArgs...)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
