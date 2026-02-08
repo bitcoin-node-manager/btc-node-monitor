@@ -68,9 +68,12 @@ func DefaultConfig() *Config {
 
 // LoadConfig loads configuration from a JSON file
 func LoadConfig(path string) (*Config, error) {
+	// Start with default config
+	cfg := DefaultConfig()
+
 	// If file doesn't exist, return default config
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return DefaultConfig(), nil
+		return cfg, nil
 	}
 
 	data, err := os.ReadFile(path)
@@ -78,9 +81,26 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	cfg := &Config{}
+	// Unmarshal onto default config, so missing fields keep defaults
 	if err := json.Unmarshal(data, cfg); err != nil {
 		return nil, err
+	}
+
+	// Apply defaults for any zero-valued critical fields
+	if cfg.Bitcoin.CLIPath == "" {
+		cfg.Bitcoin.CLIPath = "/usr/local/bin/bitcoin-cli"
+	}
+	if cfg.Bitcoin.User == "" {
+		cfg.Bitcoin.User = "bitcoin"
+	}
+	if cfg.Bitcoin.TimeoutSeconds == 0 {
+		cfg.Bitcoin.TimeoutSeconds = 10
+	}
+	if cfg.Tor.ControlPort == 0 {
+		cfg.Tor.ControlPort = 9051
+	}
+	if cfg.Tor.TimeoutSeconds == 0 {
+		cfg.Tor.TimeoutSeconds = 10
 	}
 
 	return cfg, nil
