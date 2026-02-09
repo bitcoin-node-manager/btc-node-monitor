@@ -99,18 +99,22 @@ func (s *Storage) Query(startTime, endTime time.Time) ([]*metrics.Sample, error)
 
 // GetCurrent retrieves the most recent sample
 func (s *Storage) GetCurrent() (*metrics.Sample, error) {
-	// Try to read last line from current file
-	if s.currentFile == nil {
-		return nil, fmt.Errorf("no current file open")
+	// Get current file path
+	if s.currentDay == "" {
+		return nil, fmt.Errorf("no current file")
 	}
 
-	// Seek to beginning
-	if _, err := s.currentFile.Seek(0, 0); err != nil {
-		return nil, err
+	currentPath := filepath.Join(s.dataDir, s.currentDay+".jsonl")
+
+	// Open file for reading (separate from write handle)
+	file, err := os.Open(currentPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open current file for reading: %w", err)
 	}
+	defer file.Close()
 
 	var lastSample *metrics.Sample
-	scanner := bufio.NewScanner(s.currentFile)
+	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
 		var sample metrics.Sample
